@@ -32,11 +32,14 @@ def ssh_tunnel(user, login, port, node=None, dry_run=False):
 
     ssh_tunnel += " -N "
 
-    logger.info(ssh_tunnel)
-
     cmd_jupyter = f"jupyter notebook --port={port} --no-browser"
 
     logger.info(cmd_jupyter)
+
+    logger.info(ssh_tunnel)
+
+    if not dry_run:
+        run(ssh_tunnel)
 
 
 def login_address(cluster, login=None):
@@ -74,11 +77,11 @@ def run(cmd):
 
     logger.debug(f"RUN: {cmd}")
 
-    p = Popen(
+    p = subprocess.Popen(
         cmd,
         shell=True,
-        stdout=PIPE,
-        stderr=PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
 
     stdout, stderr = p.communicate()
@@ -202,8 +205,8 @@ def main():
         if dry_run:
             logger.debug(f"enabling dry_run mode on {args.cluster}")
 
-    if not dry_run:
-        ping_address(login)
+    #if not dry_run:
+    #    ping_address(login)
 
     if args.list_port:
         list_port(login, args.user, args.port, args.cluster)
