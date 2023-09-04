@@ -23,23 +23,60 @@ cluster_list = cfg.sections()
 logger.debug(f"cluster list: {', '.join(cfg.sections())}")
 
 
-def ssh_tunnel(user, login, port, node=None, dry_run=False):
+def ssh_command(user, login, port, cluster, node=None):
 
     ssh_tunnel = f"ssh -L {port}:localhost:{port} {user}@{login} "
 
     if node is not None:
         ssh_tunnel = f"{ssh_tunnel} ssh -L {port}:localhost:{port} {node}"
-
     ssh_tunnel += " -N "
+    return ssh_tunnel
+
+
+def ssh_tunnel(user, login, port, cluster, node=None, dry_run=False):
+
+    ssh_tunnel = ssh_command(user, login, port, cluster, node)
 
     cmd_jupyter = f"jupyter notebook --port={port} --no-browser"
 
-    logger.info(cmd_jupyter)
+    if node is None:
+        print(f"""
+You want to open a ssh tunnel between your local machine and the LOGIN node ({login}) on {cluster}
+        """)
+    else:
+        print(f"""
+You want to open a ssh tunnel between your local machine and the COMPUTE node \"{node}\" on {cluster}
+        """)
 
-    logger.info(ssh_tunnel)
+    jupyter_info = f"""
+    On your remote machine run:
+    {cmd_jupyter}
+    """
 
-    if not dry_run:
-        run(ssh_tunnel)
+    ssh_tunnel_info = f"""
+    On your local machine run:
+    {ssh_tunnel}
+    """
+
+    #logger.info(cmd_jupyter)
+    #logger.info(ssh_tunnel)
+
+    print(jupyter_info)
+
+    if dry_run:
+        print("""
+You are on remote machine (or in dry-run mode)
+        """)
+        print(ssh_tunnel_info)
+
+    else:
+
+        print("""
+You are on your local machine, opening tunnel ...
+ATTENTION: until the shell hangs, the ssh-tunnel is working
+        """)
+        run(ssh_tunnel, True)
+        raise ConnectionError(f"SSH-Tunnel not working")
 
 
 def login_address(cluster, login=None):
@@ -73,9 +110,12 @@ def is_cluster(cluster):
     return False
 
 
-def run(cmd):
+def run(cmd, verbose=False):
 
     logger.debug(f"RUN: {cmd}")
+
+    if verbose:
+        print(f"{cmd}")
 
     p = subprocess.Popen(
         cmd,
@@ -216,7 +256,7 @@ def main():
         clean_port(login, args.user, args.port, args.cluster)
         return
 
-    ssh_tunnel(args.user, login, args.port, args.compute, dry_run)
+    ssh_tunnel(args.user, login, args.port, args.cluster, args.compute, dry_run)
 
 
 if __name__ == "__main__":
