@@ -39,42 +39,72 @@ def ssh_tunnel(user, login, port, cluster, node=None, dry_run=False):
 
     cmd_jupyter = f"jupyter notebook --port={port} --no-browser"
 
+    header = """
+   _                          _ _
+  | |_ _   _ _ __  _ __   ___| | | ___ _ __
+  | __| | | | '_ \| '_ \ / _ \ | |/ _ \ '__|
+  | |_| |_| | | | | | | |  __/ | |  __/ |
+   \__|\__,_|_| |_|_| |_|\___|_|_|\___|_|
+
+"""
+
+    print(header)
+
     if node is None:
-        print(f"""
-You want to open a ssh tunnel between your local machine and the LOGIN node ({login}) on {cluster}
-        """)
+        print(
+            f"""You want to open a SSH-Tunnel between your LOCAL machine and the LOGIN node ({login}) on {cluster}."""
+        )
     else:
-        print(f"""
-You want to open a ssh tunnel between your local machine and the COMPUTE node \"{node}\" on {cluster}
-        """)
+        print(
+            f"""You want to open a ssh tunnel between your LOCAL machine and the COMPUTE node \"{node}\" on {cluster}."""
+        )
+
+    if dry_run:
+        print("""You are on remote machine (or in dry-run mode).""")
+    else:
+        print("""You are on your local machine.""")
+
+    print(
+        f'You are using the username "{user}". This should be your username on the {cluster} cluster.'
+    )
 
     jupyter_info = f"""
-    On your remote machine run:
+Step 1. Launch jupyter notebook
+
+On your REMOTE machine run the following command to open a jupyter notebook:
     {cmd_jupyter}
+
+NB: once you have also completed step 2, open a browser on your local machine and copy the URL in the address bar.
     """
 
     ssh_tunnel_info = f"""
-    On your local machine run:
+On your LOCAL machine open a SSh-Tunnel with the following command:
     {ssh_tunnel}
     """
 
-    #logger.info(cmd_jupyter)
-    #logger.info(ssh_tunnel)
+    # logger.info(cmd_jupyter)
+    # logger.info(ssh_tunnel)
 
     print(jupyter_info)
 
-    if dry_run:
-        print("""
-You are on remote machine (or in dry-run mode)
-        """)
-        print(ssh_tunnel_info)
+    print(
+        """
+Step 2. Open SSH-Tunnel
+    """
+    )
 
+    if dry_run:
+        print(
+            """You are on remote machine (or in dry-run mode), thus following the istructions"""
+        )
+        print(ssh_tunnel_info)
     else:
 
-        print("""
-You are on your local machine, opening tunnel ...
+        print(
+            """You are on your local machine, thus we open the SSH-Tunnel ...
 ATTENTION: until the shell hangs, the ssh-tunnel is working
-        """)
+        """
+        )
         run(ssh_tunnel, True)
         raise ConnectionError(f"SSH-Tunnel not working")
 
@@ -142,10 +172,10 @@ def ping_address(ip):
 
 def list_port(addr, user, port, cluster):
 
-    if is_cluster(cluster):
-        cmd = f"lsof -ti:{port}"
-    else:
-        cmd = f"ssh {user}@{addr} lsof -ti:{port}"
+    cmd = f"lsof -ti:{port}"
+
+    if not is_cluster(cluster):
+        cmd = f"ssh {user}@{addr} {cmd}"
 
     stdout, stderr = run(cmd)
 
@@ -169,7 +199,7 @@ def clean_port(addr, user, port, cluster):
 def main():
 
     parser = argparse.ArgumentParser(
-        prog="ssh-tunnel",
+        prog="tunneller",
         description=__doc__,
         formatter_class=argparse.RawTextHelpFormatter,
     )
@@ -182,7 +212,18 @@ def main():
     )
 
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0, help="increase verbosity"
+        "-u",
+        "--user",
+        default=os.environ["USER"],
+        help="user name on the cluster. (default %(default)s)",
+    )
+
+    parser.add_argument(
+        "-c",
+        "--cluster",
+        choices=cluster_list,
+        default=cluster_list[0],
+        help="cluster to use. (default %(default)s)",
     )
 
     parser.add_argument(
@@ -191,8 +232,9 @@ def main():
         dest="login",
         default=1,
         type=int,
-        help="login. (default %(default)s)",
+        help="login ID to use. (default %(default)s)",
     )
+
     parser.add_argument(
         "-n",
         "--node",
@@ -202,29 +244,27 @@ def main():
     )
 
     parser.add_argument(
-        "-c",
-        "--cluster",
-        choices=cluster_list,
-        default=cluster_list[0],
-        help="cluster. (default %(default)s)",
-    )
-    parser.add_argument(
-        "-p", "--port", default=9999, help="port. (default %(default)s)"
-    )
-    parser.add_argument(
-        "-u", "--user", default=os.environ["USER"], help="user. (default %(default)s)"
+        "-p", "--port", default=9999, help="port to use. (default %(default)s)"
     )
 
     parser.add_argument(
-        "--clean-port", action="store_true", help="clean port. (default %(default)s)"
+        "--port-list",
+        action="store_true",
+        help="list all open files related to the current port. To check if a port is already in use",
     )
 
     parser.add_argument(
-        "--list-port", action="store_true", help="list port. (default %(default)s)"
+        "--port-clean",
+        action="store_true",
+        help="close all open files related to the current port. To close all files related to the port",
     )
 
     parser.add_argument(
         "--dry-run", action="store_true", help="dry-run mode. (default %(default)s)"
+    )
+
+    parser.add_argument(
+        "-v", "--verbose", action="count", default=0, help="increase verbosity."
     )
 
     args = parser.parse_args()
@@ -245,7 +285,7 @@ def main():
         if dry_run:
             logger.debug(f"enabling dry_run mode on {args.cluster}")
 
-    #if not dry_run:
+    # if not dry_run:
     #    ping_address(login)
 
     if args.list_port:
