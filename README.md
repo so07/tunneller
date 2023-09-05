@@ -5,6 +5,19 @@ Utility to manage SSH-Tunnel to CINECA clusters.
 An SSH tunnel is a secure method for forwarding network traffic between two devices over an encrypted connection.  
 It uses the SSH protocol to create a secure "tunnel" through which data can be securely transmitted.
 
+## Install
+
+`tunneller` can be installed with `pip` by running:
+```
+pip install tunneller
+```
+
+You can also install it from source:
+```
+git clone https://github.com/so07/tunneller.git
+cd tunneller
+python setup.py install
+```
 
 ## Usage
 
