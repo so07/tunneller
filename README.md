@@ -2,9 +2,19 @@
 
 Utility to manage SSH-Tunnel to CINECA clusters.
 
-An SSH tunnel is a secure method for forwarding network traffic between two devices over an encrypted connection.
+An SSH tunnel is a secure method for forwarding network traffic between two devices over an encrypted connection.  
+It uses the SSH protocol to create a secure "tunnel" through which data can be securely transmitted.
+
 
 ## Usage
+
+`tunneller` can be run either on your local machine or on a CINECA cluster.  
+- When you run on a CINECA cluster, the instructions you have to execute on your local machine are printed out on the screen.  
+  Thus you have to copy and paste the instructions on a shell of your local machine.
+- While when you run it on your local machine, the SSH tunnel is opened.
+
+
+## Examples of Usage
 
 - To open an SSH-Tunel to Leonardo cluster login node with the default options:
 ```
