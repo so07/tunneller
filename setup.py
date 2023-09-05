@@ -10,12 +10,12 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="tunneller",
-    version="0.1.1",
+    version="0.1.2",
     author="Sergio Orlandini",
     author_email="s.orlandini@cineca.it",
     description="Utility to manage SSH-Tunnel to CINECA clusters",
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    #long_description_content_type="text/markdown",
     url="https://github.com/so07/tunneller",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
