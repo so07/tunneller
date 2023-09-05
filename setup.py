@@ -10,7 +10,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="tunneller",
-    version="0.0.0",
+    version="0.1.0",
     author="",
     author_email="",
     description="",
