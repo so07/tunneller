@@ -1,6 +1,6 @@
 # 0.1.2
 
-- remove useless option in setup
+- init file
 
 # 0.1.1
 
