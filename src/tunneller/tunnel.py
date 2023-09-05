@@ -6,12 +6,12 @@ Utility to manage SSH-Tunnel to CINECA clusters.
 
   This is the same of running: ssh -L 9999:localhost:9999 USER@login01-ext.leonardo.cineca.it -N
 
-- To open a double SSH-Tunnel to the Leonardo compute node lrdn2655 on the port 9998 passing through login 02
+- To open a double SSH-Tunnel to the Leonardo compute node lrdn2655 on the port 9998 passing through login02
   $ tunneller -u USER -c leonardo -p 9998 -n lrdn2655
 
   This is the same of: ssh -L 9998:localhost:9998 sorland2@login02-ext.leonardo.cineca.it ssh -L 9998:localhost:9998 lrdn2655 -N
 
-- To clean of opened files related to port 9998 on Leonardo cluster login 02:
+- To kill all processes that have network connections on port 9998 on Leonardo cluster login02:
   $ tunneller -u USER -c leonardo -p 9998 -l 2 --port-clean
 """
 import os
@@ -267,27 +267,32 @@ def main():
     group_port = parser.add_argument_group("Port options")
 
     group_port.add_argument(
-        "-p", "--port", default=9999, help="port to use. (default %(default)s)"
+        "-p",
+        "--port",
+        default=9999,
+        help="port to use for SSH-Tunnel. (default %(default)s)",
     )
 
     group_port.add_argument(
         "--port-list",
         action="store_true",
-        help="list all open files related to the current port. To check if a port is already in use",
+        help="list all processes IDs that have network connections on the current port. To check if a port is already in use",
     )
 
     group_port.add_argument(
         "--port-clean",
         action="store_true",
-        help="close all open files related to the current port. To close all files related to the port",
+        help="kill all processes that have network connections on the current port",
     )
 
     parser.add_argument(
-        "--dry-run", action="store_true", help="dry-run mode. (default %(default)s)"
+        "--dry-run",
+        action="store_true",
+        help="dry-run mode. Do not execute SSH-Tunnel (default %(default)s)",
     )
 
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0, help="increase verbosity"
+        "-v", "--verbose", action="count", default=0, help="increase verbosity level"
     )
 
     args = parser.parse_args()
