@@ -1,3 +1,7 @@
+# 0.1.4
+
+- fix setup file for cluster configuration file
+
 # 0.1.3
 
 - manifest file

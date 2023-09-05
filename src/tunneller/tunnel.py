@@ -226,7 +226,7 @@ def main():
     parser.add_argument(
         "--version",
         action="version",
-        version="0.1.3",
+        version="0.1.4",
         help="print version and exit",
     )
 
