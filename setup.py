@@ -10,7 +10,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setup(
     name="tunneller",
-    version="0.1.3",
+    version="0.1.4",
     author="Sergio Orlandini",
     author_email="s.orlandini@cineca.it",
     description="Utility to manage SSH-Tunnel to CINECA clusters",
@@ -19,6 +19,8 @@ setup(
     url="https://github.com/so07/tunneller",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
+    package_data={'': ['tunneller/cluster.ini']},
+    include_package_data=True,
     install_requires=[""],
     entry_points={
         "console_scripts": [
