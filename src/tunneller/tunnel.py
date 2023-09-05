@@ -1,3 +1,19 @@
+"""
+Utility to manage SSH-Tunnel to CINECA clusters.
+
+- To open an SSH-Tunnel to the Leonardo cluster login with the default options:
+  $ tunneller -u USER -c leonardo
+
+  This is the same of running: ssh -L 9999:localhost:9999 USER@login01-ext.leonardo.cineca.it -N
+
+- To open a double SSH-Tunnel to the Leonardo compute node lrdn2655 on the port 9998 passing through login 02
+  $ tunneller -u USER -c leonardo -p 9998 -n lrdn2655
+
+  This is the same of: ssh -L 9998:localhost:9998 sorland2@login02-ext.leonardo.cineca.it ssh -L 9998:localhost:9998 lrdn2655 -N
+
+- To clean of opened files related to port 9998 on Leonardo cluster login 02:
+  $ tunneller -u USER -c leonardo -p 9998 -l 2 --port-clean
+"""
 import os
 import subprocess
 import argparse
@@ -9,7 +25,6 @@ logger = logging.getLogger()
 
 logging.basicConfig(
     level=logging.INFO,
-    # level=logging.DEBUG,
     format="[%(asctime)s SSHFS_PY-%(levelname)s] %(message)s",
     datefmt="%H:%M:%S",
 )
@@ -24,12 +39,14 @@ logger.debug(f"cluster list: {', '.join(cfg.sections())}")
 
 
 def ssh_command(user, login, port, cluster, node=None):
+    """Returns command for SSH-Tunnel"""
 
     ssh_tunnel = f"ssh -L {port}:localhost:{port} {user}@{login} "
 
     if node is not None:
         ssh_tunnel = f"{ssh_tunnel} ssh -L {port}:localhost:{port} {node}"
     ssh_tunnel += " -N "
+
     return ssh_tunnel
 
 
@@ -170,7 +187,8 @@ def ping_address(ip):
         logger.debug(f"succesfully ping: {ip}")
 
 
-def list_port(addr, user, port, cluster):
+def port_list(addr, user, port, cluster):
+    """List all open files on the port"""
 
     cmd = f"lsof -ti:{port}"
 
@@ -183,7 +201,8 @@ def list_port(addr, user, port, cluster):
         logger.info(f"at port {port} found {stdout}")
 
 
-def clean_port(addr, user, port, cluster):
+def port_clean(addr, user, port, cluster):
+    """Kills all open files on the port"""
 
     if is_cluster(cluster):
         cmd = f"lsof -ti:{port} | xargs kill -9"
@@ -208,17 +227,19 @@ def main():
         "--version",
         action="version",
         version="0.0.0",
-        help="version",
+        help="print version and exit",
     )
 
-    parser.add_argument(
+    group_cluster = parser.add_argument_group("Cluster options")
+
+    group_cluster.add_argument(
         "-u",
         "--user",
         default=os.environ["USER"],
         help="user name on the cluster. (default %(default)s)",
     )
 
-    parser.add_argument(
+    group_cluster.add_argument(
         "-c",
         "--cluster",
         choices=cluster_list,
@@ -226,7 +247,7 @@ def main():
         help="cluster to use. (default %(default)s)",
     )
 
-    parser.add_argument(
+    group_cluster.add_argument(
         "-l",
         "--login",
         dest="login",
@@ -235,7 +256,7 @@ def main():
         help="login ID to use. (default %(default)s)",
     )
 
-    parser.add_argument(
+    group_cluster.add_argument(
         "-n",
         "--node",
         dest="compute",
@@ -243,17 +264,19 @@ def main():
         help="compute node. (default %(default)s)",
     )
 
-    parser.add_argument(
+    group_port = parser.add_argument_group("Port options")
+
+    group_port.add_argument(
         "-p", "--port", default=9999, help="port to use. (default %(default)s)"
     )
 
-    parser.add_argument(
+    group_port.add_argument(
         "--port-list",
         action="store_true",
         help="list all open files related to the current port. To check if a port is already in use",
     )
 
-    parser.add_argument(
+    group_port.add_argument(
         "--port-clean",
         action="store_true",
         help="close all open files related to the current port. To close all files related to the port",
@@ -264,7 +287,7 @@ def main():
     )
 
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0, help="increase verbosity."
+        "-v", "--verbose", action="count", default=0, help="increase verbosity"
     )
 
     args = parser.parse_args()
@@ -288,12 +311,12 @@ def main():
     # if not dry_run:
     #    ping_address(login)
 
-    if args.list_port:
-        list_port(login, args.user, args.port, args.cluster)
+    if args.port_list:
+        port_list(login, args.user, args.port, args.cluster)
         return
 
-    if args.clean_port:
-        clean_port(login, args.user, args.port, args.cluster)
+    if args.port_clean:
+        port_clean(login, args.user, args.port, args.cluster)
         return
 
     ssh_tunnel(args.user, login, args.port, args.cluster, args.compute, dry_run)
