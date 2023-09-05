@@ -1,3 +1,7 @@
+# 0.1.5
+
+- help improvements
+
 # 0.1.4
 
 - fix setup file for cluster configuration file
