@@ -15,7 +15,7 @@ setup(
     author_email="s.orlandini@cineca.it",
     description="Utility to manage SSH-Tunnel to CINECA clusters",
     long_description=long_description,
-    long_description_content_type="text/markdown",
+    #long_description_content_type="text/markdown",
     url="https://github.com/so07/tunneller",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
