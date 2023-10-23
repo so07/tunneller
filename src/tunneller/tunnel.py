@@ -9,7 +9,7 @@ Utility to manage SSH-Tunnel to CINECA clusters.
 - To open a double SSH-Tunnel to the Leonardo compute node lrdn2655 on the port 9998 passing through login02
   $ tunneller -u USER -c leonardo -p 9998 -n lrdn2655
 
-  This is the same of: ssh -L 9998:localhost:9998 sorland2@login02-ext.leonardo.cineca.it ssh -L 9998:localhost:9998 lrdn2655 -N
+  This is the same of: ssh -L 9998:localhost:9998 USER@login02-ext.leonardo.cineca.it ssh -L 9998:localhost:9998 lrdn2655 -N
 
 - To kill all processes that have network connections on port 9998 on Leonardo cluster login02:
   $ tunneller -u USER -c leonardo -p 9998 -l 2 --port-clean
