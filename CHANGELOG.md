@@ -1,5 +1,9 @@
 # 0.1.5
 
+- remove deprecated m100 cluster
+
+# 0.1.5
+
 - help improvements
 
 # 0.1.4
